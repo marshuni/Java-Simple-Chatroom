@@ -26,8 +26,8 @@ public class ServerCore {
             connection.receiveMessage(message);
     }
     static public void deleteThread(ServerHandler nowHandler) {
-        System.out.printf("[Core]断开一个连接，当前活跃连接数：%d\n",connections.size());
         connections.remove(nowHandler);
+        System.out.printf("[Core]断开一个连接，当前活跃连接数：%d\n",connections.size());
     }
 
 }

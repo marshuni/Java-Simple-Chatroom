@@ -5,7 +5,7 @@ import java.util.*;
 
 public class ChatroomClient {
     public static void main(String[] args) {
-        String host = "127.0.0.1";
+        String host = "server.marshuni.fun";
         int port = 23333;
         ClientNetwork connection = null;
 
