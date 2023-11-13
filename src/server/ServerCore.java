@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import shared.*;
+
 public class ServerCore {
     static int port=23333,maxConnection=12;
     static ExecutorService service = null;
@@ -21,7 +23,7 @@ public class ServerCore {
         System.out.printf("[Core]传入新的连接，当前活跃连接数：%d\n",connections.size());
         service.execute(nowHandler);
     }
-    static void forward(String message) {
+    static void forward(Message message) {
         for(ServerHandler connection:connections)
             connection.receiveMessage(message);
     }

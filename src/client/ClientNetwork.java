@@ -1,36 +1,42 @@
 package client;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+//import java.io.BufferedReader;
+//import java.io.InputStreamReader;
+//import java.io.OutputStreamWriter;
+//import java.io.PrintWriter;
 import java.net.Socket;
+
+import shared.*;
 
 public class ClientNetwork {
     Socket socket = null;
-    String host = "server.marshuni.fun";
+    String host = "localhost";
     int port = 23333;
 
-    BufferedReader reader = null;
-    PrintWriter writer = null;
+    ObjectInputStream receiver = null;
+    ObjectOutputStream sender = null;
+    
 
-    public ClientNetwork(String host, int port) throws IOException{
+    public ClientNetwork(String host, int port, User userInfo) throws IOException{
         this.host = host;
         this.port = port;
         socket = new Socket(host, port);
 
-        reader = new BufferedReader(
-                new InputStreamReader(socket.getInputStream(), "UTF-8"));
-        writer = new PrintWriter(
-                new OutputStreamWriter(socket.getOutputStream(), "UTF-8"), true);
+        sender = new ObjectOutputStream(socket.getOutputStream());
+        sender.writeObject((Message)new Message(100,userInfo));
+        sender.flush();
+
+        receiver = new ObjectInputStream(socket.getInputStream());
     }
-    public void sendMessage(String message){
-        writer.println(message);
-        writer.flush();
+    public void sendMessage(Message message) throws IOException{
+        sender.writeObject(message);
+        sender.flush();
     }
-    public String readMessage() throws IOException {
-            return reader.readLine();
+    public Message readMessage() throws IOException,ClassNotFoundException {
+            return (Message) receiver.readObject();
     }
 
     public void close() {
@@ -42,17 +48,21 @@ public class ClientNetwork {
                 }
             }
             socket = null;
-            if(reader != null){
+            if(receiver != null){
                 try {
-                    reader.close();
+                    receiver.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-            reader = null;
-            if(writer != null){
-                writer.close();
+            receiver = null;
+            if(sender != null){
+                try {
+                    sender.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-            writer = null;
+            sender = null;
     }
 }

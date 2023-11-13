@@ -3,10 +3,15 @@ package server;
 import java.net.*;
 import java.io.*;
 
+import shared.*;
+
 class ServerHandler implements Runnable{
     Socket socket = null;
-    BufferedReader reader = null;
-    PrintWriter writer = null;
+
+    ObjectInputStream receiver = null;
+    ObjectOutputStream sender = null;
+
+    User userInfo = null;
 
     public ServerHandler(Socket socket){
         this.socket = socket;
@@ -14,17 +19,22 @@ class ServerHandler implements Runnable{
     @Override
     public void run() {
         try{
-            reader = new BufferedReader(
-                    new InputStreamReader(socket.getInputStream(), "UTF-8"));
-            writer = new PrintWriter(
-                    new OutputStreamWriter(socket.getOutputStream(), "UTF-8"));
-            String readMessage = null;
+            receiver = new ObjectInputStream(socket.getInputStream());
+            sender = new ObjectOutputStream(socket.getOutputStream());
+            sender.writeObject((Message)new Message(100,"成功连接，欢迎来到聊天室！"));
+            sender.flush();
+            //ObjectInputStream的构造函数在收到一个对象之后才会继续，因此双方建立连接后需要先发送一条消息。
+
+            Message nowMessage = (Message)receiver.readObject();
+            userInfo = nowMessage.user;
+            System.out.println("[Handler:"+userInfo.userName+"]建立连接："+nowMessage.content);
+
             while(true){
-                if((readMessage = reader.readLine()) == null){
+                if((nowMessage = (Message)receiver.readObject()) == null){
                     break;
                 }
-                System.out.println("[Handler]收到消息："+readMessage);
-                ServerCore.forward(readMessage);
+                System.out.println("[Handler:"+userInfo.userName+"]收到消息："+nowMessage.content);
+                ServerCore.forward(nowMessage);
             }
         }catch(Exception e){
             e.printStackTrace();
@@ -37,23 +47,31 @@ class ServerHandler implements Runnable{
                 }
             }
             socket = null;
-            if(reader != null){
+            if(receiver != null){
                 try {
-                    reader.close();
+                    receiver.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-            reader = null;
-            if(writer != null){
-                writer.close();
+            receiver = null;
+            if(sender != null){
+                try {
+                    sender.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-            writer = null;
+            sender = null;
             ServerCore.deleteThread(this);
         }
     }
-    public void receiveMessage(String message) {
-        writer.println(message);
-        writer.flush();
+    public void receiveMessage(Message message){
+        try {
+            sender.writeObject(message);
+            sender.flush();
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
     }
 }
