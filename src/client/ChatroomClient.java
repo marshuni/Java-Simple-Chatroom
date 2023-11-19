@@ -1,35 +1,48 @@
 package client;
 
-import java.util.*;
-
 import shared.*;
 
 public class ChatroomClient {
-    public static void main(String[] args) {
-        String host = "localhost";
-        int port = 23333;
-        User userInfo = new User("100", "marshuni");
-        ClientNetwork connection = null;
+    static String host = "server.marshuni.fun";
+    static int port = 23333;
+    static User userInfo = new User("100", "marshuni");
+    static ClientNetwork connection = null;
 
-        Scanner s = new Scanner(System.in);
+    public static void main(String[] args) {
+
+        ClientGUI gui = new ClientGUI();
+        Thread threadGUI = new Thread(gui);
+
         try{
             connection = new ClientNetwork(host, port,userInfo);
-
-            
-            while(true){
-                Message nowMessage = new Message(userInfo,s.nextLine());
-                if(nowMessage.content.equals("exit")){
+            threadGUI.start();
+            while(true) {
+                if(threadGUI.isAlive() == false) {
                     break;
                 }
-                connection.sendMessage(nowMessage);
-                System.out.println(connection.readMessage().output());
+                gui.displayMessage(connection.readMessage());
             }
         }catch(Exception e){
             e.printStackTrace();
         }finally{
-            if(connection != null)
+            if(connection != null) {
+                Message closeMessage = new Message(150,userInfo.toString()+"离开了。");
+                try {
+                    connection.sendMessage(closeMessage);
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
                 connection.close();
+            }
         }
-        s.close();
+    }
+
+    public static void sendMessage(String messageStr) {
+        try{
+            Message message = new Message(userInfo, messageStr);
+            connection.sendMessage(message);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
 }

@@ -9,4 +9,7 @@ public class User implements Serializable {
         this.userID = id;
         this.userName = name;
     }
+    public String toString() {
+        return userName;
+    }
 }

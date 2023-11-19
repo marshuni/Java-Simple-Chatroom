@@ -12,6 +12,7 @@ public class Message implements Serializable {
     public Message(int status,String content) {
         // 系统传送消息
         this.status = 100;
+        // 100-建立连接 150-断开连接
         this.user = new User("0","Server");
         this.content = content;
         this.time = new Date();
