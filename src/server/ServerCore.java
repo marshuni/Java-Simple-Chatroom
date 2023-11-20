@@ -24,9 +24,10 @@ public class ServerCore {
         service.execute(nowHandler);
     }
     static void forward(Message message) {
-        // TODO: 分聊天室进行转发
-        for(ServerHandler connection:connections)
-            connection.receiveMessage(message);
+        for(ServerHandler connection:connections){
+            if(connection.roomInfo.roomID == message.room.roomID || message.room.roomName == "ToAll")
+                connection.receiveMessage(message);
+        }
     }
     static public void deleteThread(ServerHandler nowHandler) {
         connections.remove(nowHandler);

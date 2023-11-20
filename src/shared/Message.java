@@ -9,25 +9,29 @@ public class Message implements Serializable {
     public User user;
     public String content;
     public Date time;
+    public Room room;
     public Message(int status,String content) {
         // 系统传送消息
         this.status = status;
         // 100-建立连接 150-断开连接
-        this.user = new User("0","Server");
+        this.user = new User(0,"Server");
+        this.room = new Room("ToAll");
         this.content = content;
         this.time = new Date();
     }
-    public Message(int status,User user) {
+    public Message(User user,Room room) {
         // 系统传送消息
         this.status = 100;
         this.user = user;
-        content = "传送用户信息："+user.userName;
+        this.room = room;
+        content = "用户信息："+user.userName+"，房间号："+room.roomName;
         this.time = new Date();
     }
-    public Message(User user,String content) {
+    public Message(User user, Room room, String content) {
         // 用户传送消息
         this.status = 200;
         this.user = user;
+        this.room = room;
         this.content = content;
         this.time = new Date();
     }

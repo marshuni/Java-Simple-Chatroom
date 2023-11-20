@@ -15,6 +15,7 @@ class ServerHandler implements Runnable{
     ObjectOutputStream sender = null;
 
     User userInfo = null;
+    Room roomInfo = null;
 
     private static final int TIMEOUT = 300000; // 超时时间为5分钟，单位为毫秒
     Timer timer = null;
@@ -34,6 +35,8 @@ class ServerHandler implements Runnable{
 
             Message nowMessage = (Message)receiver.readObject();
             userInfo = nowMessage.user;
+            roomInfo = nowMessage.room;
+            ServerCore.forward(new Message(userInfo, roomInfo,"加入了聊天。"));
             System.out.println("[Handler:"+userInfo.userName+"]建立连接："+nowMessage.content);
 
             // 启动计时器，超时自动关闭连接
@@ -43,8 +46,9 @@ class ServerHandler implements Runnable{
                 if(receiveStream.available() > 0) {
                     nowMessage = (Message)receiver.readObject();
                     System.out.println("[Handler:"+userInfo.userName+"]收到消息："+nowMessage.content);
-                    if(nowMessage.status==150)
+                    if(nowMessage.status==150){
                         break;
+                    }
                     resetTimer();
                     ServerCore.forward(nowMessage);
                 }
@@ -52,8 +56,8 @@ class ServerHandler implements Runnable{
         }catch(Exception e){
             e.printStackTrace();
         }finally{
-            close();
             ServerCore.deleteThread(this);
+            close();
         }
     }
     public void receiveMessage(Message message){
@@ -80,8 +84,12 @@ class ServerHandler implements Runnable{
         timer.cancel();
         startTimer();
     }
+    public void deleteTimer() {
+        timer.cancel();
+    }
 
     public void close() {
+        ServerCore.forward(new Message(userInfo, roomInfo,"离开了。"));
         if(socket != null){
             try {
                 socket.close();
@@ -106,5 +114,6 @@ class ServerHandler implements Runnable{
             }
         }
         sender = null;
+        deleteTimer();
     }
 }

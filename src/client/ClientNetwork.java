@@ -3,10 +3,6 @@ package client;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-//import java.io.BufferedReader;
-//import java.io.InputStreamReader;
-//import java.io.OutputStreamWriter;
-//import java.io.PrintWriter;
 import java.net.Socket;
 
 import shared.*;
@@ -20,13 +16,13 @@ public class ClientNetwork {
     ObjectOutputStream sender = null;
     
 
-    public ClientNetwork(String host, int port, User userInfo) throws IOException{
+    public ClientNetwork(String host, int port, User userInfo, Room roomInfo) throws IOException{
         this.host = host;
         this.port = port;
         socket = new Socket(host, port);
 
         sender = new ObjectOutputStream(socket.getOutputStream());
-        sender.writeObject((Message)new Message(100,userInfo));
+        sender.writeObject((Message)new Message(userInfo,roomInfo));
         sender.flush();
 
         receiver = new ObjectInputStream(socket.getInputStream());

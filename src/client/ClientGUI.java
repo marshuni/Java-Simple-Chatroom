@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 import javax.swing.JPanel;
 import javax.swing.JButton;
@@ -17,10 +18,8 @@ public class ClientGUI {
     private JTextArea displayTextArea = new JTextArea(14,40); //消息展示框
     private JTextArea inputTextArea = new JTextArea(4,30); //消息发送框
 
-    // TODO: 输入服务器、端口号、聊天室和用户名
-
-    public void init() {
-        mainWindow.setTitle("网上聊天室");
+    public void init(String room) {
+        mainWindow.setTitle("网上聊天室: "+room);
 
         // 底部输入区
         JPanel bottomPanel=new JPanel();
@@ -60,5 +59,15 @@ public class ClientGUI {
     public boolean getWindowStatus()
     {
         return mainWindow.isShowing();
+    }
+    public String getInputInfo(String message,String defaultStr) {
+        String result = JOptionPane.showInputDialog(mainWindow, message);
+        if(!result.isEmpty())
+            return result;
+        else
+            return defaultStr;
+    }
+    public void displayInfo(String info) {
+        JOptionPane.showMessageDialog(mainWindow, info, info, 0);
     }
 }
