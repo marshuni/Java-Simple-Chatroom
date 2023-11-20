@@ -24,6 +24,7 @@ public class ServerCore {
         service.execute(nowHandler);
     }
     static void forward(Message message) {
+        // TODO: 分聊天室进行转发
         for(ServerHandler connection:connections)
             connection.receiveMessage(message);
     }

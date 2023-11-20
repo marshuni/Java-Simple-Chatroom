@@ -17,6 +17,7 @@ class ServerHandler implements Runnable{
     User userInfo = null;
 
     private static final int TIMEOUT = 300000; // 超时时间为5分钟，单位为毫秒
+    Timer timer = null;
 
     public ServerHandler(Socket socket){
         this.socket = socket;
@@ -35,30 +36,24 @@ class ServerHandler implements Runnable{
             userInfo = nowMessage.user;
             System.out.println("[Handler:"+userInfo.userName+"]建立连接："+nowMessage.content);
 
-            // 计时器，当输入流超过5分钟没有输入时，自动断开连接。
-            Timer timer = new Timer();
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    // 在计时器超时时停止程序
-                    System.out.println("[Handler:\"+userInfo.userName+\"]连接超时，断开连接");
-                    close();
-                }
-            }, TIMEOUT);
+            // 启动计时器，超时自动关闭连接
+            startTimer();
 
             while(true){
                 if(receiveStream.available() > 0) {
                     nowMessage = (Message)receiver.readObject();
                     System.out.println("[Handler:"+userInfo.userName+"]收到消息："+nowMessage.content);
-                    ServerCore.forward(nowMessage);
                     if(nowMessage.status==150)
                         break;
+                    resetTimer();
+                    ServerCore.forward(nowMessage);
                 }
             }
         }catch(Exception e){
             e.printStackTrace();
         }finally{
             close();
+            ServerCore.deleteThread(this);
         }
     }
     public void receiveMessage(Message message){
@@ -69,6 +64,23 @@ class ServerHandler implements Runnable{
             e.printStackTrace();
         }
     }
+
+    public void startTimer() {
+        timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                // 在计时器超时时停止程序
+                System.out.println("[Handler:"+userInfo.userName+"]连接超时，断开连接");
+                close();
+            }
+        }, TIMEOUT);
+    }
+    public void resetTimer() {
+        timer.cancel();
+        startTimer();
+    }
+
     public void close() {
         if(socket != null){
             try {
@@ -94,6 +106,5 @@ class ServerHandler implements Runnable{
             }
         }
         sender = null;
-        ServerCore.deleteThread(this);
     }
 }

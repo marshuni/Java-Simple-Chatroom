@@ -11,14 +11,15 @@ import java.io.IOException;
 
 import shared.Message;
 
-public class ClientGUI implements Runnable{
+public class ClientGUI {
     JFrame mainWindow = new JFrame("聊天窗口");
     JButton sendButton = new JButton("发送");//发送按钮
     private JTextArea displayTextArea = new JTextArea(14,40); //消息展示框
-    private JTextArea inputTextArea = new JTextArea(4,40); //消息发送框
+    private JTextArea inputTextArea = new JTextArea(4,30); //消息发送框
 
-    @Override
-    public void run() {
+    // TODO: 输入服务器、端口号、聊天室和用户名
+
+    public void init() {
         mainWindow.setTitle("网上聊天室");
 
         // 底部输入区
@@ -43,16 +44,21 @@ public class ClientGUI implements Runnable{
         mainWindow.add(centerPanel,BorderLayout.CENTER);
         centerPanel.add(displayTextArea);
 
-        mainWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        mainWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         mainWindow.pack(); //拥有关闭窗口的功能
         mainWindow.setVisible(true);
+        
     }
 
-    public void sendMessage(String messageStr) {
+    private void sendMessage(String messageStr) {
         ChatroomClient.sendMessage(messageStr);
     }
     public void displayMessage(Message messageSource) throws IOException{
         String message = messageSource.output();
         displayTextArea.append(message+'\n');
+    }
+    public boolean getWindowStatus()
+    {
+        return mainWindow.isShowing();
     }
 }
